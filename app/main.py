@@ -1,3 +1,5 @@
+# app/main.py
+
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 import io, base64
@@ -16,7 +18,7 @@ def index():
     return """
     <html><body style="font-family:sans-serif;margin:40px">
       <h2>Mutation Load Visualizer</h2>
-      <p>Upload 1–4 TSV/CSV files that contain at least chromosome, position, and alt-allele frequency.</p>
+      <p>Upload 1–4 TSV/CSV files (your variant outputs).</p>
       <form action="/analyze" method="post" enctype="multipart/form-data">
         <p>File 1 (required): <input type="file" name="file1" required></p>
         <p>File 2 (optional): <input type="file" name="file2"></p>
@@ -42,11 +44,11 @@ async def analyze(
     end: int = Form(...),
 ):
     try:
-        uploads = [file1, file2, file3, file4]
+        uploaded = [file1, file2, file3, file4]
         dfs = []
         names = []
 
-        for f in uploads:
+        for f in uploaded:
             if f is None:
                 continue
             content = await f.read()
@@ -62,7 +64,8 @@ async def analyze(
         fig, ax = plt.subplots(figsize=(8, 4))
         for i, df in enumerate(dfs):
             xs, ys = compute_mutation_load(df, chrom, start, end, bin_size=30)
-            ax.plot(xs, ys, label=names[i], lw=2)
+            if xs:
+                ax.plot(xs, ys, label=names[i], lw=2)
 
         ax.set_title(f"Mutation load {chrom}:{start}-{end}")
         ax.set_xlabel("Genomic position")
@@ -86,7 +89,7 @@ async def analyze(
         """
 
     except Exception as e:
-        # THIS is what will show up in the browser instead of a plain 500
+        # show exact error in browser (better than 500)
         return HTMLResponse(
             f"<h3 style='color:red'>Error while processing:</h3><pre>{e}</pre>",
             status_code=500,
