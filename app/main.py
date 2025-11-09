@@ -59,7 +59,7 @@ async def analyze(
     plt.close(fig)
     img_b64 = base64.b64encode(buf.getvalue()).decode()
 
-        return f"""
+    return f"""
     <html><body style="font-family:sans-serif;margin:40px">
       <h2>Mutation-load plot</h2>
       <img src="data:image/png;base64,{img_b64}" />
