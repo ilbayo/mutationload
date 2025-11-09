@@ -1,3 +1,4 @@
+from app.mutation_load import load_variant_file, compute_mutation_load
 from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
 import io, base64
